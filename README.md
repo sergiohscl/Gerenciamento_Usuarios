@@ -41,3 +41,21 @@
 ## CORS permite que seus recursos sejam acessados ​​em outros domínios. ( https://pypi.org/project/django-cors-headers/ )
 
     pip install django-cors-headers
+
+# Rodando projeto em Docker
+
+## Rodar o docker-compose
+    docker compose up -d --build
+
+## Ver containers rodando
+    docker ps
+
+## Parar tudo
+    docker compose down
+
+## Para e remover volumes (resetar banco)
+    docker compose down -v
+
+## Acessar projeto
+    localhost:8000/admin (usuario: admin senha: admin123)
+    localhost:8000/swagger
