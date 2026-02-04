@@ -1,4 +1,6 @@
-# PROJETO API DJANGO E DRF PARA GERENCIAMENTO DE USUÁRIOS.
+# PROJETO FullStack GERENCIAMENTO DE USUÁRIOS.
+
+# Backend (Django APIS)
 
 ## Criar venv e instalar Django e DRF
 
@@ -59,3 +61,9 @@
 ## Acessar projeto
     localhost:8000/admin (usuario: admin senha: admin123)
     localhost:8000/swagger
+
+## Rodar todos os testes (dentro do Docker)
+    docker compose exec web python manage.py test
+
+## Rodar teste apenas em um arquivo especifico(ex: test_models)
+    docker compose exec web python manage.py test apps.accounts.tests.[nome do arquivo]
