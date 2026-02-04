@@ -3,7 +3,7 @@ from django.urls import path
 from django.conf.urls.static import static
 from drf_yasg.views import get_schema_view
 from rest_framework_simplejwt.views import TokenRefreshView
-from apps.accounts.apis.viewsets import LoginAPIView, LogoutAPIView, RegisterAPIView # noqa E501
+from apps.accounts.apis.viewsets import LoginAPIView, LogoutAPIView, MeAPIView, RegisterAPIView, UserDetailAPIView, UserListAPIView # noqa E501
 from core import settings
 from drf_yasg import openapi
 from rest_framework import permissions
@@ -37,6 +37,11 @@ urlpatterns = [
 
     # REFRESH (SimpleJWT)
     path('api/v1/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # noqa E501
+
+    # accounts
+    path("api/v1/admin/users/", UserListAPIView.as_view(), name="admin-user-list"), # noqa E501
+    path("api/v1/admin/users/<int:user_id>/", UserDetailAPIView.as_view(), name="admin-user-detail"), # noqa E501
+    path("api/v1/me/", MeAPIView.as_view(), name="me"),
 ]
 
 if settings.DEBUG:

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from apps.accounts.apis.serializers import UserSerializer, LoginSerializer, LogoutSerializer # noqa E501
+from apps.accounts.managers.permissions import IsSuperUser
 from apps.accounts.managers.register_manager import RegisterManager
 from apps.accounts.models import Usuario
 from drf_yasg.utils import swagger_auto_schema
@@ -23,7 +24,7 @@ def get_tokens_for_user(user: Usuario) -> dict:
 
 
 class RegisterAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated, IsSuperUser]
     serializer_class = UserSerializer
     http_method_names = ["post"]
     parser_classes = [MultiPartParser]
@@ -57,7 +58,7 @@ class RegisterAPIView(APIView):
             ),
         ],
         responses={201: openapi.Response("Usuário registrado com sucesso!")},
-        operation_summary="Registra usuário",
+        operation_summary="(ADMIN) Registra usuário",
     )
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -163,3 +164,67 @@ class LogoutAPIView(APIView):
             {"message": "Logout realizado com sucesso!"},
             status=status.HTTP_200_OK
         )
+
+
+class UserListAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    http_method_names = ["get"]
+
+    @swagger_auto_schema(
+        operation_summary="(ADMIN) Lista usuários",
+        responses={200: UserSerializer(many=True)},
+    )
+    def get(self, request, *args, **kwargs):
+        users = Usuario.objects.all().order_by("-id")
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    http_method_names = ["get", "delete"]
+
+    @swagger_auto_schema(
+        operation_summary="(ADMIN) Busca usuário por ID",
+        responses={200: UserSerializer},
+    )
+    def get(self, request, user_id, *args, **kwargs):
+        try:
+            user = Usuario.objects.get(id=user_id)
+        except Usuario.DoesNotExist:
+            return Response(
+                {"error": "Usuário não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="(ADMIN) Deleta usuário por ID",
+        responses={204: openapi.Response("Usuário deletado com sucesso.")},
+    )
+    def delete(self, request, user_id, *args, **kwargs):
+        try:
+            user = Usuario.objects.get(id=user_id)
+        except Usuario.DoesNotExist:
+            return Response(
+                {"error": "Usuário não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    @swagger_auto_schema(
+        operation_summary="Retorna dados do usuário logado",
+        responses={200: UserSerializer},
+    )
+    def get(self, request, *args, **kwargs):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
