@@ -4,6 +4,7 @@ import MePage from "@/pages/MePage";
 import AdminUsersPage from "@/pages/AdminUsersPage";
 import { PrivateRoute } from "./PrivateRoute";
 import { AdminRoute } from "./AdminRoute";
+import ForbiddenPage from "@/pages/ForbiddenPage";
 
 export default function AppRouter() {
   return (
@@ -30,6 +31,8 @@ export default function AppRouter() {
             </AdminRoute>
           }
         />
+
+        <Route path="/forbidden" element={<ForbiddenPage />} />
 
         <Route path="*" element={<Navigate to="/me" replace />} />
       </Routes>
