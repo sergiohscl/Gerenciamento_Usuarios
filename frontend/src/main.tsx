@@ -4,12 +4,17 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import App from "./App";
 import "./index.css";
+import AppBackground from "./components/AppBackground";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <AppBackground>
+
+      <Provider store={store}>
+        <App />
+      </Provider>
+
+    </AppBackground>
   </React.StrictMode>
 );
 
