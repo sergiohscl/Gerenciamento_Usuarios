@@ -25,7 +25,7 @@ export async function loginRequest(body: LoginBody) {
 }
 
 export async function meRequest() {
-  const { data } = await api.get("/api/v1/auth/me/");
+  const { data } = await api.get("/api/v1/me/");
   return data;
 }
 
