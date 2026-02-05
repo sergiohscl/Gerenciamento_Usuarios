@@ -5,7 +5,7 @@ export default function App() {
   return (
     <>
       <AppRouter />
-      <Toaster richColors />
+      <Toaster richColors position="bottom-center" />
     </>
   );
 }
