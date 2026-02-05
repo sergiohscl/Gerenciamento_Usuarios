@@ -1,50 +1,83 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { api } from "@/services/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Trash2, UserRound } from "lucide-react";
+
+import { api } from "@/services/api";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import AppLayout from "@/components/app-layout";
 
 type UserItem = {
   id: number;
   username: string;
   email: string;
+  avatar?: string | null;
 };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const API_BASE = useMemo(() => {
+    return (
+      import.meta.env.VITE_API_BASE_URL ||
+      import.meta.env.VITE_API_URL ||
+      "http://localhost:8000"
+    );
+  }, []);
+
+  function getAvatarUrl(user: UserItem) {
+    if (!user.avatar) return undefined;
+    if (user.avatar.startsWith("http")) return user.avatar;
+
+    const path = user.avatar.startsWith("/") ? user.avatar : `/${user.avatar}`;
+    return `${API_BASE}${path}`;
+  }
 
   async function loadUsers() {
-    setError(null);
     try {
+      setIsLoading(true);
       const { data } = await api.get<UserItem[]>("/api/v1/admin/users/");
       setUsers(data);
     } catch (e: any) {
       if (e?.response?.status === 403) {
-        toast.error("Acesso negado (apenas superusuário).");
-        setError("Acesso negado: apenas superusuário pode ver esta página.");
+        toast.error("Acesso negado", {
+          description: "Apenas superusuário pode ver esta página.",
+        });
       } else {
         toast.error("Erro ao carregar usuários.");
-        setError("Erro ao carregar usuários.");
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handleDelete(id: number) {
-    setError(null);
+    const ok = window.confirm("Tem certeza que deseja remover este usuário?");
+    if (!ok) return;
+
     try {
+      setDeletingId(id);
       await api.delete(`/api/v1/admin/users/${id}/`);
       setUsers((prev) => prev.filter((u) => u.id !== id));
-      toast.success("Usuário deletado!");
+      toast.success("Usuário removido com sucesso.");
     } catch (e: any) {
       if (e?.response?.status === 403) {
         toast.error("Acesso negado.");
-        setError("Acesso negado.");
       } else {
         toast.error("Não foi possível deletar.");
-        setError("Não foi possível deletar.");
       }
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -53,43 +86,105 @@ export default function AdminUsersPage() {
   }, []);
 
   return (
-    <div className="min-h-screen p-6 flex justify-center">
-      <div className="w-full max-w-3xl grid gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Admin - Usuários</CardTitle>
-            <Button variant="outline" asChild>
-              <Link to="/me">Voltar</Link>
-            </Button>
-          </CardHeader>
+    <AppLayout>
+      <main className="flex-1 px-4 py-6 md:px-8 md:py-8 max-w-5xl mx-auto w-full space-y-6">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">Usuários</h1>
+            <p className="text-sm text-slate-400">
+              Lista de usuários cadastrados no sistema.
+            </p>
+          </div>       
+        </header>
 
-          <CardContent className="grid gap-3">
-            {error && <p className="text-sm text-red-500">{error}</p>}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent bg-slate-900/80">
+                <TableHead className="w-18 text-slate-200 font-semibold">
+                  Avatar
+                </TableHead>
+                <TableHead className="text-slate-200 font-semibold">
+                  Nome
+                </TableHead>
+                <TableHead className="text-slate-200 font-semibold">
+                  Email
+                </TableHead>
+                <TableHead className="w-20 text-center text-slate-200 font-semibold">
+                  ID
+                </TableHead>
+                <TableHead className="w-32 text-right text-slate-200 font-semibold">
+                  Ação
+                </TableHead>
+              </TableRow>
+            </TableHeader>
 
-            {users.length === 0 && !error ? (
-              <p>Carregando...</p>
-            ) : (
-              <div className="grid gap-2">
-                {users.map((u) => (
-                  <div
-                    key={u.id}
-                    className="flex items-center justify-between rounded-md border p-3"
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-8 text-slate-400"
                   >
-                    <div className="grid">
-                      <span className="font-medium">{u.username}</span>
-                      <span className="text-sm text-muted-foreground">{u.email}</span>
-                    </div>
+                    Carregando usuários...
+                  </TableCell>
+                </TableRow>
+              )}
 
-                    <Button variant="destructive" onClick={() => handleDelete(u.id)} className="cursor-pointer">
-                      Deletar
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              {!isLoading && users.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-8 text-slate-400"
+                  >
+                    Nenhum usuário encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!isLoading &&
+                users.map((user) => {
+                  const avatarUrl = getAvatarUrl(user);
+
+                  return (
+                    <TableRow key={user.id} className="border-slate-800">
+                      <TableCell>
+                        <Avatar className="w-9 h-9">
+                          <AvatarImage src={avatarUrl} alt={user.username} />
+                          <AvatarFallback className="bg-slate-700">
+                            <UserRound className="w-4 h-4 text-slate-200" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+
+                      <TableCell className="font-medium">
+                        {user.username}
+                      </TableCell>
+
+                      <TableCell>{user.email}</TableCell>
+
+                      <TableCell className="text-center text-slate-400">
+                        {user.id}
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(user.id)}
+                          disabled={deletingId === user.id}
+                          className="inline-flex items-center justify-center rounded-md border border-slate-700 px-2 py-1 text-xs text-red-400 hover:bg-red-950 hover:text-red-300 disabled:opacity-60 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          {deletingId === user.id ? "Removendo..." : "Remover"}
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </div>
+      </main>
+    </AppLayout>
   );
 }

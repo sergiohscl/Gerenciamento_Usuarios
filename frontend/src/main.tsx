@@ -8,13 +8,10 @@ import AppBackground from "./components/AppBackground";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AppBackground>
-
-      <Provider store={store}>
+    <Provider store={store}>
+      <AppBackground>
         <App />
-      </Provider>
-
-    </AppBackground>
-  </React.StrictMode>
+      </AppBackground>
+    </Provider>
+  </React.StrictMode>,
 );
-
