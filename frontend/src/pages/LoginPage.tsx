@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const dispatch = useAppDispatch();
@@ -27,6 +28,7 @@ export default function LoginPage() {
       navigate("/me");
     } catch (e) {
       setError("Credenciais inválidas ou erro no servidor.");
+      toast.error("Falha no login. Verifique email e senha.");
     } finally {
       setLoading(false);
     }

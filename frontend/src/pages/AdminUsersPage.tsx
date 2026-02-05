@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type UserItem = {
   id: number;
@@ -21,8 +22,10 @@ export default function AdminUsersPage() {
       setUsers(data);
     } catch (e: any) {
       if (e?.response?.status === 403) {
+        toast.error("Acesso negado (apenas superusuário).");
         setError("Acesso negado: apenas superusuário pode ver esta página.");
       } else {
+        toast.error("Erro ao carregar usuários.");
         setError("Erro ao carregar usuários.");
       }
     }
@@ -33,10 +36,13 @@ export default function AdminUsersPage() {
     try {
       await api.delete(`/api/v1/admin/users/${id}/`);
       setUsers((prev) => prev.filter((u) => u.id !== id));
+      toast.success("Usuário deletado!");
     } catch (e: any) {
       if (e?.response?.status === 403) {
+        toast.error("Acesso negado.");
         setError("Acesso negado.");
       } else {
+        toast.error("Não foi possível deletar.");
         setError("Não foi possível deletar.");
       }
     }
@@ -74,7 +80,7 @@ export default function AdminUsersPage() {
                       <span className="text-sm text-muted-foreground">{u.email}</span>
                     </div>
 
-                    <Button variant="destructive" onClick={() => handleDelete(u.id)}>
+                    <Button variant="destructive" onClick={() => handleDelete(u.id)} className="cursor-pointer">
                       Deletar
                     </Button>
                   </div>
