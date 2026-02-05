@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loginSuccess, logout } from "@/store/auth/authSlice";
+import { loginRequest, logoutRequest, meRequest } from "@/services/auth";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector((s) => s.auth);
+
+  const [email, setEmail] = useState("admin@admin.com");
+  const [password, setPassword] = useState("admin123");
+
+  const handleLogin = async () => {
+    const data = await loginRequest({ email, password });
+    dispatch(loginSuccess({ user: data.user, tokens: data.tokens }));
+  };
+
+  const handleMe = async () => {
+    const data = await meRequest();
+    alert(JSON.stringify(data, null, 2));
+  };
+
+  const handleLogout = async () => {
+    const refresh = auth.tokens?.refresh;
+    if (refresh) {
+      await logoutRequest(refresh);
+    }
+    dispatch(logout());
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: 24 }}>
+      <h1>Frontend JWT</h1>
 
-export default App
+      {!auth.isAuthenticated ? (
+        <div style={{ display: "grid", gap: 8, maxWidth: 320 }}>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
+          <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="senha" type="password" />
+          <button onClick={handleLogin}>Login</button>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 8 }}>
+          <div>Logado como: {auth.user?.email}</div>
+          <button onClick={handleMe}>Me</button>
+          <button onClick={handleLogout}>Logout</button>
+        </div>
+      )}
+    </div>
+  );
+}
