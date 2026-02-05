@@ -1,23 +1,8 @@
 import { api } from "@/services/api";
-
-export type LoginBody = {
-  email: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  message: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    avatar?: string | null;
-  };
-  tokens: {
-    access: string;
-    refresh: string;
-  };
-};
+import type {
+  LoginBody,
+  LoginResponse   
+} from "@/store/auth/authTypes";
 
 export async function loginRequest(body: LoginBody) {
   const { data } = await api.post<LoginResponse>("/api/v1/auth/login/", body);
@@ -31,5 +16,12 @@ export async function meRequest() {
 
 export async function logoutRequest(refresh: string) {
   const { data } = await api.post("/api/v1/auth/logout/", { refresh });
+  return data;
+}
+
+export async function registerRequest(body: FormData) {
+  const { data } = await api.post("/api/v1/auth/register/", body, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }

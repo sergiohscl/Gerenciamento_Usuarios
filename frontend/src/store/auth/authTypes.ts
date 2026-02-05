@@ -15,3 +15,22 @@ export interface AuthState {
   tokens: Tokens | null;
   isAuthenticated: boolean;
 }
+
+export type LoginBody = {
+  email: string;
+  password: string;
+};
+
+export type LoginResponse = {
+  message: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    avatar?: string | null;
+  };
+  tokens: {
+    access: string;
+    refresh: string;
+  };
+};

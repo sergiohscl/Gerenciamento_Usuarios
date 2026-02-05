@@ -26,7 +26,10 @@ export default function AppNavbar() {
               Perfil Usuário
             </Link>
             <Link to="/admin/users" className="hover:underline">
-              Área Admin
+              Listar Usuários
+            </Link>
+             <Link to="/auth/register" className="hover:underline">
+              Registrar Usuário
             </Link>
           </nav>
         </div>
