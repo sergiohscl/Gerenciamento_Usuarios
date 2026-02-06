@@ -19,8 +19,8 @@ const registerSchema = z
   .object({
     username: z.string().min(3, "Informe um username (mín. 3 caracteres)"),
     email: z.string().email("Informe um e-mail válido"),
-    password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-    password2: z.string().min(6, "Confirme a senha"),
+    password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
+    password2: z.string().min(8, "Confirme a senha"),
     avatar: z.any().optional(),
   })
   .refine((data) => data.password === data.password2, {
@@ -30,10 +30,10 @@ const registerSchema = z
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-
 export default function RegisterPage() {
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const {
     register,
