@@ -41,7 +41,7 @@ export default function MePage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen px-8 pt-16 flex justify-center items-start ">
+      <div className="min-h-full px-8 pt-16 flex justify-center items-center ">
         <Card className="px-12 py-10 bg-slate-900 border border-slate-800 rounded-xl ">
           <CardTitle className="text-center text-white mb-6">
             Meu Perfil

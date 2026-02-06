@@ -3,13 +3,14 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { loginRequest } from "@/services/auth";
+import { loginRequest, googleLoginRequest } from "@/services/auth";
 import { useAppDispatch } from "@/store/hooks";
 import { loginSuccess } from "@/store/auth/authSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleLogin } from "@react-oauth/google";
 
 const schema = z.object({
   email: z.string().email("Informe um e-mail válido"),
@@ -41,6 +42,26 @@ export default function LoginPage() {
     }
   };
 
+  async function handleGoogleSuccess(credential?: string) {
+    if (!credential) {
+      toast.error("Falha no login com Google.");
+      return;
+    }
+
+    try {
+      const data = await googleLoginRequest({ token: credential });
+
+      dispatch(loginSuccess({ user: data.user, tokens: data.tokens }));
+
+      toast.success("Login com Google realizado com sucesso!");
+      navigate("/me");
+    } catch (e: any) {
+      const detail =
+        e?.response?.data?.detail || "Não foi possível autenticar com Google.";
+      toast.error(String(detail));
+    }
+  }
+
   return (
     <div className="min-h-screen px-8 pt-38 flex justify-center items-start">
       <Card className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
@@ -70,13 +91,30 @@ export default function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" disabled={form.formState.isSubmitting} className="cursor-pointer">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="cursor-pointer"
+            >
               {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+
+          <div className="flex items-center gap-3 my-1">
+            <div className="h-px flex-1 bg-slate-800" />
+            <span className="text-xs text-slate-400">ou</span>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={(res) => handleGoogleSuccess(res.credential)}
+              onError={() => toast.error("Falha no login com Google.")}
+              useOneTap={false}
+            />
+          </div>
         </CardContent>
       </Card>
-      
     </div>
   );
 }

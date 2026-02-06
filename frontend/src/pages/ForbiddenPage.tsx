@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ForbiddenPage() {
   return (
-    <div className="min-h-screen px-8 pt-46 flex justify-center items-start">
+    <div className="px-8 pt-46 flex justify-center items-start">
       <Card className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl ">
         <CardHeader className="text-slate-200">
           <CardTitle>Acesso negado</CardTitle>
