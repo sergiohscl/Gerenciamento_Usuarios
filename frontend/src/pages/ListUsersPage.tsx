@@ -84,9 +84,7 @@ export default function AdminUsersPage() {
       setDeletingId(id);
       await api.delete(`/api/v1/admin/users/${id}/`);
       toast.success("Usuário removido com sucesso.");
-
-      // ✅ recarrega a página atual (e ajusta caso fique vazia)
-      // Se deletou o último item da página, tenta voltar uma página
+      
       const willBeEmptyAfterDelete = users.length === 1 && page > 1;
       const nextPage = willBeEmptyAfterDelete ? page - 1 : page;
 
@@ -105,8 +103,7 @@ export default function AdminUsersPage() {
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
   useEffect(() => {
-    loadUsers(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadUsers(1);   
   }, []);
 
   return (
