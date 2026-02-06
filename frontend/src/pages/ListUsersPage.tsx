@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Trash2, UserRound } from "lucide-react";
-
 import { api } from "@/services/api";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
@@ -14,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import AppLayout from "@/components/app-layout";
+import { Button } from "@/components/ui/button";
 
 type UserItem = {
   id: number;
@@ -26,6 +25,9 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
 
   const API_BASE = useMemo(() => {
     return (
@@ -48,6 +50,7 @@ export default function AdminUsersPage() {
       setIsLoading(true);
       const { data } = await api.get<UserItem[]>("/api/v1/admin/users/");
       setUsers(data);
+      setPage(1);
     } catch (e: any) {
       if (e?.response?.status === 403) {
         toast.error("Acesso negado", {
@@ -81,6 +84,18 @@ export default function AdminUsersPage() {
     }
   }
 
+  const totalItems = users.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return users.slice(start, start + pageSize);
+  }, [users, page, pageSize]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -94,7 +109,7 @@ export default function AdminUsersPage() {
             <p className="text-sm text-slate-400">
               Lista de usuários cadastrados no sistema.
             </p>
-          </div>       
+          </div>
         </header>
 
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
@@ -143,7 +158,7 @@ export default function AdminUsersPage() {
               )}
 
               {!isLoading &&
-                users.map((user) => {
+                paginatedUsers.map((user) => {
                   const avatarUrl = getAvatarUrl(user);
 
                   return (
@@ -183,6 +198,36 @@ export default function AdminUsersPage() {
                 })}
             </TableBody>
           </Table>
+
+          {!isLoading && users.length > 0 && (
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-800">
+              <p className="text-sm text-slate-400">
+                Total: <b className="text-slate-200">{totalItems}</b> • Página{" "}
+                <b className="text-slate-200">{page}</b> de{" "}
+                <b className="text-slate-200">{totalPages}</b>
+              </p>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Anterior
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Próximo
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </AppLayout>

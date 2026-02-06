@@ -39,8 +39,6 @@ export default function MePage() {
       : `${import.meta.env.VITE_API_URL}${me.avatar}`
     : undefined;
 
-  console.log("Avatar URL:", avatarUrl);
-
   return (
     <AppLayout>
       <div className="min-h-screen px-8 pt-16 flex justify-center items-start ">
