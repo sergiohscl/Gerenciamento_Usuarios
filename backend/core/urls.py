@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
+from apps.accounts.apis.google_oauth import GoogleAuthAPIView
 from drf_yasg.views import get_schema_view
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.accounts.apis.viewsets import LoginAPIView, LogoutAPIView, MeAPIView, RegisterAPIView, UserDetailAPIView, UserListAPIView # noqa E501
@@ -34,6 +35,7 @@ urlpatterns = [
     path('api/v1/auth/register/', RegisterAPIView.as_view(), name='auth-register'), # noqa E501
     path('api/v1/auth/login/', LoginAPIView.as_view(), name='auth-login'),
     path('api/v1/auth/logout/', LogoutAPIView.as_view(), name='auth-logout'),
+    path("api/v1/auth/google/", GoogleAuthAPIView.as_view(), name="auth-google"), # noqa E501
 
     # REFRESH (SimpleJWT)
     path('api/v1/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # noqa E501
