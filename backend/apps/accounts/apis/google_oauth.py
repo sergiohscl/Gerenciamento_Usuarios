@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from apps.accounts.api.serializers import UserSerializer
+from apps.accounts.apis.serializers import UserSerializer
 
 User = get_user_model()
 
