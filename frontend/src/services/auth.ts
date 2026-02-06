@@ -25,3 +25,8 @@ export async function registerRequest(body: FormData) {
   });
   return data;
 }
+
+export async function googleLoginRequest(payload: { token: string }) {
+  const { data } = await api.post("/api/v1/auth/google/", payload);
+  return data;
+}

@@ -117,7 +117,7 @@ export default function RegisterPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen px-8 pt-16 flex justify-center items-start">
+      <div className="px-8 pt-16 flex justify-center items-start">
         <Card className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
           <CardHeader>
             <CardTitle className="text-center">Registrar Usuário</CardTitle>

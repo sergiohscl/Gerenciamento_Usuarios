@@ -14,7 +14,7 @@ export default function AppNavbar() {
   };
 
   return (
-    <header className="w-full border-b border-white/10 bg-black/40 backdrop-blur text-white">
+    <header className="w-full border-b border-white/10 bg-black/40 backdrop-blur text-white mt-12">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/me" className="flex items-center gap-2">

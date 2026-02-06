@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#root {
+  overflow-x: hidden;
+}
+
 @custom-variant dark (&:is(.dark *));
 :root {
   --radius: 0.625rem;
