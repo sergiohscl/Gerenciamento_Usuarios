@@ -13,6 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.settings import api_settings
 
 
 def get_tokens_for_user(user: Usuario) -> dict:
@@ -170,14 +171,18 @@ class UserListAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSuperUser]
     http_method_names = ["get"]
 
-    @swagger_auto_schema(
-        operation_summary="(ADMIN) Lista usuários",
-        responses={200: UserSerializer(many=True)},
-    )
     def get(self, request, *args, **kwargs):
-        users = Usuario.objects.all().order_by("-id")
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        qs = Usuario.objects.all().order_by("-id")
+
+        paginator_class = api_settings.DEFAULT_PAGINATION_CLASS
+        if paginator_class is None:
+            serializer = UserSerializer(qs, many=True)
+            return Response(serializer.data)
+
+        paginator = paginator_class()
+        page = paginator.paginate_queryset(qs, request, view=self)
+        serializer = UserSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class UserDetailAPIView(APIView):
