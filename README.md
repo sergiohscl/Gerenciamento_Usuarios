@@ -67,3 +67,34 @@
 
 ## Rodar teste apenas em um arquivo especifico(ex: test_models)
     docker compose exec web python manage.py test apps.accounts.tests.[nome do arquivo]
+
+# Frontend ( React Vite, Typescript, Tailwindcss, Shadcn)
+
+Dentro da pasta `frontend/`:
+
+```bash
+# 1. Instalar dependências
+npm install
+
+# 2. Rodar em modo dev (Vite)
+npm run dev
+```
+
+Por padrão, o Vite sobe em `http://localhost:5173`.
+
+## Rodar no docker
+
+```bash
+# 1. docker compose
+docker compose up -d --build
+
+# 2. parar tudo
+docker compose down
+```
+## Tele Login
+    email: admin@admin.com
+    senha: admin123
+
+—
+👨‍💻 Desenvolvido por Sergio Henrique  
+🚀 React • Django • JWT • Docker
