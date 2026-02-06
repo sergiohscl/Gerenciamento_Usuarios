@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
+import type { PaginatedResponse } from "@/store/auth/authTypes";
 
 type UserItem = {
   id: number;
@@ -23,6 +24,9 @@ type UserItem = {
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
+  const [count, setCount] = useState(0);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -45,12 +49,20 @@ export default function AdminUsersPage() {
     return `${API_BASE}${path}`;
   }
 
-  async function loadUsers() {
+  async function loadUsers(pageNum = 1) {
     try {
       setIsLoading(true);
-      const { data } = await api.get<UserItem[]>("/api/v1/admin/users/");
-      setUsers(data);
-      setPage(1);
+
+      const offset = (pageNum - 1) * pageSize;
+      const { data } = await api.get<PaginatedResponse<UserItem>>(
+        `/api/v1/admin/users/?limit=${pageSize}&offset=${offset}`
+      );
+
+      setUsers(data.results);
+      setCount(data.count);
+      setNextUrl(data.next);
+      setPrevUrl(data.previous);
+      setPage(pageNum);
     } catch (e: any) {
       if (e?.response?.status === 403) {
         toast.error("Acesso negado", {
@@ -71,8 +83,14 @@ export default function AdminUsersPage() {
     try {
       setDeletingId(id);
       await api.delete(`/api/v1/admin/users/${id}/`);
-      setUsers((prev) => prev.filter((u) => u.id !== id));
       toast.success("Usuário removido com sucesso.");
+
+      // ✅ recarrega a página atual (e ajusta caso fique vazia)
+      // Se deletou o último item da página, tenta voltar uma página
+      const willBeEmptyAfterDelete = users.length === 1 && page > 1;
+      const nextPage = willBeEmptyAfterDelete ? page - 1 : page;
+
+      await loadUsers(nextPage);
     } catch (e: any) {
       if (e?.response?.status === 403) {
         toast.error("Acesso negado.");
@@ -84,20 +102,11 @@ export default function AdminUsersPage() {
     }
   }
 
-  const totalItems = users.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  const paginatedUsers = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return users.slice(start, start + pageSize);
-  }, [users, page, pageSize]);
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
-  useEffect(() => {
-    loadUsers();
+    loadUsers(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -158,7 +167,7 @@ export default function AdminUsersPage() {
               )}
 
               {!isLoading &&
-                paginatedUsers.map((user) => {
+                users.map((user) => {
                   const avatarUrl = getAvatarUrl(user);
 
                   return (
@@ -199,10 +208,10 @@ export default function AdminUsersPage() {
             </TableBody>
           </Table>
 
-          {!isLoading && users.length > 0 && (
+          {!isLoading && count > 0 && (
             <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-800">
               <p className="text-sm text-slate-400">
-                Total: <b className="text-slate-200">{totalItems}</b> • Página{" "}
+                Total: <b className="text-slate-200">{count}</b> • Página{" "}
                 <b className="text-slate-200">{page}</b> de{" "}
                 <b className="text-slate-200">{totalPages}</b>
               </p>
@@ -211,8 +220,8 @@ export default function AdminUsersPage() {
                 <Button
                   variant="outline"
                   className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
+                  onClick={() => loadUsers(page - 1)}
+                  disabled={!prevUrl || page <= 1}
                 >
                   Anterior
                 </Button>
@@ -220,8 +229,8 @@ export default function AdminUsersPage() {
                 <Button
                   variant="outline"
                   className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
+                  onClick={() => loadUsers(page + 1)}
+                  disabled={!nextUrl || page >= totalPages}
                 >
                   Próximo
                 </Button>
