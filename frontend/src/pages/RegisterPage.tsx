@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -31,8 +30,9 @@ const registerSchema = z
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
+const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
 export default function RegisterPage() {
-  const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const {
@@ -40,6 +40,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
+    reset,
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -93,7 +94,17 @@ export default function RegisterPage() {
       await registerRequest(form);
 
       toast.success("Cadastro realizado com sucesso!");
-      navigate("/login");
+      reset({
+        username: "",
+        email: "",
+        password: "",
+        password2: "",
+        avatar: undefined,
+      });
+      setAvatarPreview(null);
+      setValue("avatar", undefined);
+
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err: any) {
       const detail =
         err?.response?.data?.detail ||
@@ -134,6 +145,7 @@ export default function RegisterPage() {
                     onChange={handleAvatarChange}
                     disabled={isSubmitting}
                     className="file:bg-slate-500 cursor-pointer"
+                    ref={fileInputRef}
                   />
                   <p className="text-xs text-slate-500">
                     PNG ou JPG, de preferência até {MAX_AVATAR_MB}MB.
@@ -203,7 +215,11 @@ export default function RegisterPage() {
                 )}
               </div>
 
-              <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full cursor-pointer"
+              >
                 {isSubmitting ? "Cadastrando..." : "Cadastrar"}
               </Button>
             </form>
