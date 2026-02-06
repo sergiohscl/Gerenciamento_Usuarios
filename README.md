@@ -2,62 +2,60 @@
 
 # Backend (Django APIS)
 
-## Criar venv e instalar Django e DRF
+# Clone o Repositorio no github:
+    link repositório - https://github.com/sergiohscl/Gerenciamento_Usuarios
+```bash
+git clone
+```
 
-    python3 -m venv venv
-    . venv/bin/activate # Linux
-    . venv/Scripts/activate # Windows
+## Criar ambinete virtual venv
+```bash
+# 1. Linux
+python3 -m venv venv
+    . venv/bin/activate
 
-    pip install django
-    pip install djangorestframework
-    pip install flake8
-    pip install Pillow
-    pip install drf-yasg
-    pip install django-filter
-    pip install dotenv
-    pip install psycopg2-binary
-
-## Criar e inicializar projeto Django
-
-    django-admin startproject core .
-    python manage.py migrate
-    python manage.py createsuperuser
+# 2. windows
+python3 -m venv venv
+    . venv/Scripts/activate
+```
 
 ## Criar e instalar as dependências no projeto
+```bash
+pip freeze > requirements.txt
 
-    pip freeze > requirements.txt
-    pip install -r requirements.txt
+pip install -r requirements.txt
+```
+## Criar as .env e rodar database
+```bash
+python manage.py makemigrations
 
+python manage.py migrate
+```
+## Criar Super Usuario
+```bash
+python manage.py createsuperuser
+```
 ## Rodar o sistema e acessar o admin
+```bash
+python manage.py runserver
+```
 
-    python manage.py runserver
 
-## Criar app de accounts
-
-    python manage.py startapp accounts
-
-## Autenticação por JWT. ( https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html )
-
-    pip install djangorestframework-simplejwt
-
-## CORS permite que seus recursos sejam acessados ​​em outros domínios. ( https://pypi.org/project/django-cors-headers/ )
-
-    pip install django-cors-headers
 
 # Rodando projeto em Docker
+```bash
+# 1. docker compose
+docker compose up -d --build
 
-## Rodar o docker-compose
-    docker compose up -d --build
+# 2. parar tudo
+docker compose down
 
-## Ver containers rodando
-    docker ps
+# 3. Para e remove volumes (resetar banco)
+docker compose down -v
 
-## Parar tudo
-    docker compose down
-
-## Para e remover volumes (resetar banco)
-    docker compose down -v
-
+# 4. Ver containers rodando
+docker ps
+```
 ## Acessar projeto
     localhost:8000/admin (usuario: admin senha: admin123)
     localhost:8000/swagger
